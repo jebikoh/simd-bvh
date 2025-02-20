@@ -1,3 +1,6 @@
 [submodule "ext/jtxlib"]
 	path = ext/jtxlib
 	url = https://github.com/jebikoh/jtxlib.git
+[submodule "ext/assimp"]
+	path = ext/assimp
+	url = https://github.com/assimp/assimp.git
