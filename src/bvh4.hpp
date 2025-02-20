@@ -62,7 +62,7 @@ struct alignas(128) BVH4Node {
      */
     int getNumPrimitives(const int child) const {
         // # of primitives is always a multiple of 4 (via padding if needed)
-        return (children[child] >> 27) & BVH4_PRIMITIVE_MASK * 4;
+        return ((children[child] >> 27) & BVH4_PRIMITIVE_MASK) * 4;
     }
 
     /**

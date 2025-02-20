@@ -1,10 +1,18 @@
 #include "bvh2.hpp"
 #include "scene.hpp"
 #include "simd.hpp"
+#include "tests.hpp"
 
 int main() {
-111111111111111111111111111
+#define RUN_TESTS
 
+#ifdef RUN_TESTS
+    std::cout << "Running tests" << std::endl;
+    for (std::size_t i = 0; i < TEST_FN_PTRS_SIZE; ++i) {
+        TEST_FN_PTRS[i]();
+    }
+    std::cout << "All tests passed" << std::endl;
+#endif
 
     Scene scene;
     scene.loadMesh("../src/assets/shaderball_hsd.obj");

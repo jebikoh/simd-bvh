@@ -46,6 +46,8 @@ add_executable(simd_bvh src/main.cpp
         src/primitives.hpp
         src/bvh4.hpp
         src/simd.hpp
+        src/tests.hpp
+        src/tests.cpp
 )
 
 target_link_libraries(simd_bvh PRIVATE jtxlib assimp)
