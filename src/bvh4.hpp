@@ -1,5 +1,6 @@
 #pragma once
 
+#include "bvh2.hpp"
 #include "simd.hpp"
 
 // QBVH: https://www.uni-ulm.de/fileadmin/website_uni_ulm/iui.inst.100/institut/Papers/QBVH.pdf
@@ -9,21 +10,21 @@ using float4 = simd::float4;
 static constexpr int BVH4_PRIMITIVE_MASK = 0xF;
 static constexpr int BVH4_INDICES_MASK = 0x7FFFFFF;
 static constexpr int BVH4_INT_MIN = 0x80000000;
+static constexpr int BVH4_MAX_PRIMS_IN_NODE = 64;
+
+struct AABB4 {
+    // Min
+    float pmin[3][4];
+
+    // Max
+    float pmax[3][4];
+};
 
 /**
  * Holds 4 bounding boxes, stored in SoA format
  */
-struct alignas(128) BVH4Node {
-    // Min
-    float4 xMin;
-    float4 yMin;
-    float4 zMin;
-
-    // Max
-    float4 xMax;
-    float4 yMax;
-    float4 zMax;
-
+struct alignas(128) LBVH4Node {
+    AABB4 bbox;
     /**
      * Children indices
      *  - If the index is negative, it is a leaf (<0)
@@ -77,3 +78,18 @@ struct alignas(128) BVH4Node {
         return children[child] & BVH4_INDICES_MASK;
     }
 };
+
+struct BVH4 {
+    std::vector<Primitive> primitives;
+    LBVH4Node *nodes = nullptr;
+    const Scene &scene;
+
+    void build();
+    void destroy() const { if (nodes) delete[] nodes; }
+
+    bool closestHit(const Ray &r, Interval t, SurfaceIntersection &record) const;
+    bool anyHit(const Ray &r, Interval t) const;
+};
+
+// BVH4 construction collapses a BVH2 tree on every 2 levels
+int flattenBVH2toLBVH4(const BVH2Node *node, LBVH4Node *nodes, int *offset);

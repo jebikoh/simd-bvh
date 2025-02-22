@@ -9,20 +9,12 @@ struct BVH2Bucket {
 void BVH2::build() {
     primitives.resize(scene.numPrimitives());
 
-    // BVH Primitives is our working span of primitives
-    // This will start out as all of them
     std::vector<Primitive> bvhPrimitives(primitives.size());
-    // for (size_t i = 0; i < scene..size(); ++i) {
-    //     primitives_[i]   = Primitive{Primitive::SPHERE, i, spheres[i].bounds()};
-    //     bvhPrimitives[i] = Primitive{Primitive::SPHERE, i, spheres[i].bounds()};
-    // }
-    // const size_t tOffset = spheres.size();
     for (size_t i = 0; i < scene.triangles.size(); ++i) {
         primitives[i]   = Primitive{Primitive::TRIANGLE, i, scene.meshes[scene.triangles[i].meshIndex].tBounds(scene.triangles[i].index)};
         bvhPrimitives[i] = Primitive{Primitive::TRIANGLE, i, scene.meshes[scene.triangles[i].meshIndex].tBounds(scene.triangles[i].index)};
     }
-    // Add rest of types when we get them
-    // We will order as we build
+
     std::vector<Primitive> orderedPrimitives(primitives.size());
 
     int totalNodes             = 1;
@@ -34,9 +26,9 @@ void BVH2::build() {
     bvhPrimitives.resize(0);
     bvhPrimitives.shrink_to_fit();
 
-    nodes     = new LinearBVH2Node[totalNodes];
+    nodes     = new LBVH2Node[totalNodes];
     int offset = 0;
-    flattenBVH2(root, nodes, &offset);
+    flattenBVH2toLBVH2(root, nodes, &offset);
 
     // Clean-up the tree
     root->destroy();
@@ -53,7 +45,7 @@ bool BVH2::closestHit(const Ray &r, Interval t, SurfaceIntersection &record) con
     bool hitAnything = false;
 
     while (true) {
-        const LinearBVH2Node *node = &nodes[currentNodeIndex];
+        const LBVH2Node *node = &nodes[currentNodeIndex];
         // 1. Check the ray intersects the current node
         //    If it doesn't, pop the stack and continue
         if (node->bbox.hit(r.origin, r.dir, t)) {
@@ -110,7 +102,7 @@ bool BVH2::anyHit(const Ray &r, Interval t) const {
     int stack[64];
 
     while (true) {
-        const LinearBVH2Node *node = &nodes[currentNodeIndex];
+        const LBVH2Node *node = &nodes[currentNodeIndex];
         if (node->bbox.hit(r.origin, r.dir, t)) {
             if (node->numPrimitives > 0) {
                 for (int i = 0; i < node->numPrimitives; ++i) {
@@ -272,8 +264,8 @@ BVH2Node *buildBVH2Tree(std::span<Primitive> bvhPrimitives, int *totalNodes, int
     return node;
 }
 
-int flattenBVH2(const BVH2Node *node, LinearBVH2Node *nodes, int *offset) {
-    LinearBVH2Node *linearNode = &nodes[*offset];
+int flattenBVH2toLBVH2(const BVH2Node *node, LBVH2Node *nodes, int *offset) {
+    LBVH2Node *linearNode = &nodes[*offset];
     linearNode->bbox          = node->bbox;
     const int nodeOffset      = (*offset)++;
     if (node->numPrimitives > 0) {
@@ -282,8 +274,8 @@ int flattenBVH2(const BVH2Node *node, LinearBVH2Node *nodes, int *offset) {
     } else {
         linearNode->axis          = node->splitAxis;
         linearNode->numPrimitives = 0;
-        flattenBVH2(node->children[0], nodes, offset);
-        linearNode->secondChildOffset = flattenBVH2(node->children[1], nodes, offset);
+        flattenBVH2toLBVH2(node->children[0], nodes, offset);
+        linearNode->secondChildOffset = flattenBVH2toLBVH2(node->children[1], nodes, offset);
     }
     return nodeOffset;
 }

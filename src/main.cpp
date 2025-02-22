@@ -4,8 +4,6 @@
 #include "tests.hpp"
 
 int main() {
-#define RUN_TESTS
-
 #ifdef RUN_TESTS
     std::cout << "Running tests" << std::endl;
     for (std::size_t i = 0; i < TEST_FN_PTRS_SIZE; ++i) {

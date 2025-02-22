@@ -2,7 +2,7 @@
 #include <cassert>
 
 void test_BVH4Node_isLeaf() {
-    BVH4Node node{};
+    LBVH4Node node{};
 
     node.children[0] = 0b1 << 31;
     node.children[1] = 0b0 << 31;
@@ -12,7 +12,7 @@ void test_BVH4Node_isLeaf() {
 }
 
 void test_BVH4Node_isInnerNode() {
-    BVH4Node node{};
+    LBVH4Node node{};
 
     node.children[0] = 0b1 << 31;
     node.children[1] = 0b0 << 31;
@@ -24,7 +24,7 @@ void test_BVH4Node_isInnerNode() {
 void test_BVH4Node_getNumPrimitives() {
     constexpr int primitives = 16 / 4;
 
-    BVH4Node node{};
+    LBVH4Node node{};
 
     node.children[0] = primitives << 27;
 
@@ -34,7 +34,7 @@ void test_BVH4Node_getNumPrimitives() {
 void test_BVH4Node_getPrimitiveIndices() {
     constexpr int index = 1493;
 
-    BVH4Node node{};
+    LBVH4Node node{};
 
     node.children[0] = index;
 

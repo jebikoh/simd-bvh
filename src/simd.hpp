@@ -528,6 +528,10 @@ inline uint4 absLt(const float4 a, const float4 b) {
   return vcaltq_f32(a, b);
 }
 
+inline float4 bitwiseSelect(const float mask, const float a, const float b) {
+  return vbslq_f32(mask, a, b);
+}
+
 // TODO: scalar operations if needed
 
 } // namespace simd

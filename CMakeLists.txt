@@ -4,6 +4,7 @@ project(simd_bvh)
 set(CMAKE_CXX_STANDARD 20)
 
 option(ENABLE_PERF_FLAGS "Enable performance flags" OFF)
+option(RUN_TESTS "Run tests" ON)
 
 if (ENABLE_PERF_FLAGS)
     if (MSVC)
@@ -15,6 +16,10 @@ if (ENABLE_PERF_FLAGS)
     else ()
         message(WARNING "[JTX] Unknown compiler. No optimization flags added.")
     endif ()
+endif ()
+
+if (RUN_TESTS)
+    add_compile_definitions(RUN_TESTS)
 endif ()
 
 if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm|aarch64")
@@ -48,6 +53,7 @@ add_executable(simd_bvh src/main.cpp
         src/simd.hpp
         src/tests.hpp
         src/tests.cpp
+        src/bvh4.cpp
 )
 
 target_link_libraries(simd_bvh PRIVATE jtxlib assimp)

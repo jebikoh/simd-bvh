@@ -1,0 +1,6 @@
+# SIMD BVH
+
+This is a separate repo to implement, test, and optimize SIMD accelerated BVH trees. It builds of the LBVH implementation in [JTX](https://github.com/jebikoh/JTX-PathTracer) (which is based off PBRTv4).
+
+I am currently working on implementing a Quad-BVH (QBVH) from this paper: [Shallow Bounding Volume Hierarchies for Fast SIMD Ray Tracing of
+                                                                           Incoherent Rays](https://www.uni-ulm.de/fileadmin/website_uni_ulm/iui.inst.100/institut/Papers/QBVH.pdf)

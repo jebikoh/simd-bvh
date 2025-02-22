@@ -7,7 +7,7 @@
 #include "scene.hpp"
 
 
-struct alignas(32) LinearBVH2Node {
+struct alignas(32) LBVH2Node {
     AABB bbox;
     union {
         int primitivesOffset;
@@ -40,7 +40,7 @@ struct BVH2Node {
     }
 
     [[nodiscard]] bool isLeaf() const {
-        return children[0] == nullptr && children[1] == nullptr;
+        return numPrimitives > 0;
     }
 
     bool isBranch() const {
@@ -61,18 +61,16 @@ struct BVH2Node {
 struct BVH2 {
     int maxPrimsInNode = 0;
     std::vector<Primitive> primitives;
-    LinearBVH2Node *nodes = nullptr;
+    LBVH2Node *nodes = nullptr;
     const Scene &scene;
 
     void build();
+    void destroy() const { if (nodes) delete[] nodes; }
+
     bool closestHit(const Ray &r, Interval t, SurfaceIntersection &record) const;
     bool anyHit(const Ray &r, Interval t) const;
-
-    void destroy() const {
-        if (nodes) delete[] nodes;
-    }
 };
 
 BVH2Node *buildBVH2Tree(std::span<Primitive> bvhPrimitives, int *totalNodes, int *orderedPrimitiveOffset, std::vector<Primitive> &orderedPrimitives, int maxPrimsInNode);
 
-int flattenBVH2(const BVH2Node *node, LinearBVH2Node *nodes, int *offset);
+int flattenBVH2toLBVH2(const BVH2Node *node, LBVH2Node *nodes, int *offset);

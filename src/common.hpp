@@ -1,8 +1,6 @@
 #pragma once
 
 #include "jtxlib/math/transform.hpp"
-
-
 #include <jtxlib/math/vector.hpp>
 
 using Vec3f = jtx::Vec3f;
