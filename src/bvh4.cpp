@@ -61,9 +61,9 @@ int flattenBVH2toLBVH4(const BVH2Node *node, LBVH4Node *nodes, int *offset) {
             linearNode->bbox.pmax[0][i] = bbox.pmax.x;
             linearNode->bbox.pmax[1][i] = bbox.pmax.y;
             linearNode->bbox.pmax[2][i] = bbox.pmax.z;
-            linearNode->bbox.pmax[0][i] = bbox.pmin.x;
-            linearNode->bbox.pmax[1][i] = bbox.pmin.y;
-            linearNode->bbox.pmax[2][i] = bbox.pmin.z;
+            linearNode->bbox.pmin[0][i] = bbox.pmin.x;
+            linearNode->bbox.pmin[1][i] = bbox.pmin.y;
+            linearNode->bbox.pmin[2][i] = bbox.pmin.z;
 
             // Encode leaf or recurse
             if (n[i]->isLeaf()) {
@@ -90,7 +90,7 @@ bool BVH4::closestHit(const Ray &r, const Interval t, SurfaceIntersection &recor
     float4 tMax = simd::broadcast(t.max);
 
     float4 origin[3];
-    bool dirIsNeg[3];
+    bool dirIsPos[3];
     Vec3f invDir;
     float4 invDir_4[3];
 
@@ -98,7 +98,7 @@ bool BVH4::closestHit(const Ray &r, const Interval t, SurfaceIntersection &recor
         origin[i]   = simd::broadcast(r.origin[i]);
         invDir[i]   = 1 / r.dir[i];
         invDir_4[i] = simd::broadcast(invDir[i]);
-        dirIsNeg[i] = invDir[i] < 0;
+        dirIsPos[i] = invDir[i] > 0.0f;
     }
 
     int toVisitOffset    = 0;
@@ -111,8 +111,8 @@ bool BVH4::closestHit(const Ray &r, const Interval t, SurfaceIntersection &recor
         const auto [pmin, pmax]       = node->bbox;
 
         for (auto i = 0; i < 3; ++i) {
-            tMin = simd::max(simd::mul(simd::sub(invDir[i] > 0.0f ? simd::load(pmin[i]) : simd::load(pmax[i]), origin[i]), invDir_4[i]), tMin);
-            tMax = simd::min(simd::mul(simd::sub(invDir[i] > 0.0f ? simd::load(pmax[i]) : simd::load(pmin[i]), origin[i]), invDir_4[i]), tMax);
+            tMin = simd::max(simd::mul(simd::sub(dirIsPos[i] ? simd::load(pmin[i]) : simd::load(pmax[i]), origin[i]), invDir_4[i]), tMin);
+            tMax = simd::min(simd::mul(simd::sub(dirIsPos[i] ? simd::load(pmax[i]) : simd::load(pmin[i]), origin[i]), invDir_4[i]), tMax);
         }
 
         const auto mask = simd::leq(tMin, tMax);
